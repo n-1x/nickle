@@ -1,0 +1,43 @@
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <script type="module" src="main.js"></script>
+        <link rel="stylesheet" href="style.css" />
+    </head>
+
+    <body>
+        <div id="container">
+            <div id="guesses" class="guesses"></div>
+            <div id="message"></div>
+            <div id="keyboard" class="keyboard"></div>
+            
+            <template id="scoreboardTemplate">
+                <div id="scoreboard">
+                    <h2 class="endGameMessage"></h2>
+                    
+                    <form class="highScoreForm">
+                        <input type="text" class="nameInput" maxLength="12" placeholder="Choose a name"/>
+                        <button type="submit" class="submitScoreButton">Submit score</button>
+                    </form>
+
+                    <h3 class="title">Loading high scores...</h3>
+
+                    <table class="scores hidden">
+                        <tr>
+                            <th>Name</th>
+                            <th># Guesses</th>
+                            <th>Time</th>
+                        </tr>
+                    </table>
+                </div>
+            </template>
+            <template id="scoreEntryTemplate">
+                <tr>
+                    <td class="name"></td>
+                    <td class="numGuesses"></td>
+                    <td class="time"></td>
+                </tr>
+            </template>
+        </div>
+    </body>
+</html>

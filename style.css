@@ -1,0 +1,192 @@
+body {
+    background-color: #111;
+    color: #fff;
+    font-family: sans-serif;
+    margin: 0;
+    height: 100%;
+    overflow: hidden;
+}
+
+#container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: top;
+    padding: 10% 0;
+    align-items: center;
+}
+
+/*GUESSES*/
+.guesses {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    font-size: 3rem;
+}
+
+.guessRow {
+    display: flex;
+    gap: 0.3rem;
+}
+
+.guessChar {
+    border: 2px solid #555;
+    border-radius: 5%;
+    padding: 0.5rem;
+    width: 3rem;
+    height: 3rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    user-select: none;
+}
+
+.submitted {
+    background-color: rgb(61, 61, 61);
+}
+
+.bounce {
+    animation-name: bounce;
+    animation-duration: 0.1s;
+}
+
+/*KEYBOARD*/
+
+.keyboardRow {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.keyboardkey {
+    background-color: #555;
+    border-radius: 15%;
+    width: 4rem;
+    height: 4rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+
+    transition: background-color 0.1s;
+}
+
+.keyboardkey:hover {
+    background-color: #444;
+}
+
+.keyboardKey.enterKey {
+    width: 4.5rem;
+}
+
+.keyboardKey.backspaceKey {
+    width: 8rem;
+}
+
+.keyboardRow:nth-child(2) {
+    margin-left: 2rem;
+}
+
+/*HINTS*/
+span.correctPosition {
+    background-color: rgb(40, 141, 40);
+}
+
+span.wordContains {
+    background-color: rgb(189, 189, 31);
+}
+
+span.keyboardKey.notInWord, .shrink {
+    transition: transform 0.3s;
+    transform: scale(0);
+}
+
+/*SCOREBOARD*/
+#scoreboard {
+    text-align: center;
+    font-size: 2rem;
+    animation-name: slideUp;
+    animation-duration: 1s;
+}
+
+@keyframes slideUp {
+    from { transform: translateY(300%); }
+    to { transform: translateY(0%); }
+}
+
+/*MESSAGE*/
+
+@keyframes fadeOut {
+    0% { opacity: 100%; }
+    50% {opacity: 1000%; }
+    100% {opacity: 0%; }
+}
+
+#message {
+    opacity: 0%;
+    font-size: 2rem;
+    height: 2rem;
+    margin: 2rem 0;
+}
+
+#message.animate {
+    animation-name: fadeOut;
+    animation-duration: 2s;
+}
+
+/*EFFECTS*/
+
+@keyframes bounce {
+    0% { transform: scale(100%); }
+    50% { transform: scale(110%); }
+    100% {transform: scale(100%); }
+}
+
+.slideBottom {
+    transition: transform 1s;
+    transform: translateY(300%);
+}
+
+.hidden {
+    opacity: 0%;
+}
+
+
+/*HIGHSCORES*/
+
+.scores {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;#
+    transition: opacity 0.3s;
+}
+
+.scores th {
+    text-align: left;
+}
+
+.scores td,th {
+    padding-right: 2rem;
+}
+
+.highScoreForm {
+    vertical-align: middle;
+}
+
+.submitScoreButton, .nameInput {
+    font-size: 1.5rem;
+    padding: 0.5rem;
+}
+
+.submitScoreButton {
+    background-color: #555;
+    color: white;
+    border: none;
+}
+
+.nameInput {
+    background-color: #555;
+    color: white;
+    border: none;
+}
