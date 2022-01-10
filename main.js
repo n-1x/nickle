@@ -122,12 +122,14 @@ class Game {
     }
     
     makeGuess(word) {
-        if (word.length !== WORD_LENGTH) {
+        const upWord = word.toUpperCase();
+        
+        if (upWord.length !== WORD_LENGTH) {
             showMessage("Guess must be five characters")
             return;
         }
         
-        if (!wordList.includes(word.toLowerCase())) {
+        if (!wordList.includes(upWord)) {
             showMessage("Not in word list");
             return;
         }
@@ -143,7 +145,7 @@ class Game {
         this.#updateClassesIf(unusedChars, "wordContains", char => unusedChars.includes(char));
         this.#updateClassesIf(unusedChars, "notInWord", char => !this.#targetWord.includes(char));
         
-        this.#guesses.push(word);
+        this.#guesses.push(upWord);
         window.localStorage.setItem("guesses", JSON.stringify(this.#guesses));
         window.localStorage.setItem("lastSaveTime", (new Date()).getTime());
 
