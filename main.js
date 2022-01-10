@@ -181,23 +181,19 @@ class Game {
         for (const row of this.#guessRows) {
             const stateRow = [];
 
-            for (const el of row.querySelectorAll(".guessChar")) {
+            for (const el of row.querySelectorAll(".submitted")) {
                 if (el.classList.contains("correctPosition")) {
-                    stateRow.push(2);
+                    stateRow.push(3);
                 }
                 else if (el.classList.contains("wordContains")) {
-                    stateRow.push(1);
+                    stateRow.push(2);
                 }
                 else {
-                    stateRow.push(0);
+                    stateRow.push(1);
                 }
             }
 
-            if (stateRow.reduce((prev, current) => {
-                return prev + current;
-            }) > 0) {
-                state.push(stateRow);
-            }
+            state.push(stateRow);
         }
 
         return state;
@@ -314,7 +310,7 @@ function createEndGamePlate(victory, allowSubmit, numGuesses) {
     shareButton.onclick = () => {
         const emojiArray = ["⬛", "🟨", "🟩"];
         const emojiBoard = currentGame.getBoardState()
-            .map(row => row.map(i => emojiArray[i]).join("")).join("\n");
+            .map(row => row.map(i => emojiArray[i-1]).join("")).join("\n");
 
         navigator.clipboard.writeText(`Nickle ${(new Date()).toLocaleDateString()}\n\n${emojiBoard}`);
         showMessage("Copied to clipboard");
