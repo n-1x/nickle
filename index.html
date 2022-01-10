@@ -8,37 +8,45 @@
 
     <body>
         <div id="container">
-            <div id="guesses" class="guesses"></div>
-            <div id="message"></div>
-            <div id="keyboard" class="keyboard"></div>
-            
-            <template id="scoreboardTemplate">
-                <div id="scoreboard">
-                    <h2 class="endGameMessage"></h2>
-                    
-                    <form class="highScoreForm">
-                        <input type="text" class="nameInput" maxLength="12" placeholder="Choose a name"/>
-                        <button type="submit" class="submitScoreButton">Submit score</button>
-                    </form>
-
-                    <h3 class="title">Loading high scores...</h3>
-
-                    <table class="scores hidden">
-                        <tr>
-                            <th>Name</th>
-                            <th>Guesses</th>
-                            <th>Time</th>
-                        </tr>
-                    </table>
-                </div>
-            </template>
-            <template id="scoreEntryTemplate">
-                <tr>
-                    <td class="name"></td>
-                    <td class="numGuesses"></td>
-                    <td class="time"></td>
-                </tr>
-            </template>
+            <div id="gameContainer">
+                <div id="guesses" class="guesses"></div>
+                <div id="message"></div>
+                <div id="keyboard" class="keyboard"></div>
+            </div>
+            <div id="scoreboardContainer" class="shrink"></div>
         </div>
     </body>
+            
+    <template id="endGameTemplate">
+        <div id="endGame">
+            <h2 class="endGameMessage"></h2>
+            
+            <form class="highScoreForm">
+                <input type="text" class="nameInput" maxLength="12" placeholder="Choose a name"/>
+                <button type="submit" class="submitScoreButton">Submit score</button>
+            </form>
+            
+            <button id="showHighScoresButton">Show Highscores</button>
+        </div>
+    </template>
+    <template id="scoreboardTemplate">
+        <button id="closeHighScoresButton">Back to game</button>
+
+        <h1 class="title">Loading high scores...</h1>
+
+        <table id="scoresTable" class="shrink">
+            <tr>
+                <th>Name</th>
+                <th>Guesses</th>
+                <th>Time</th>
+            </tr>
+        </table>
+    </template>
+    <template id="scoreEntryTemplate">
+        <tr>
+            <td class="name"></td>
+            <td class="numGuesses"></td>
+            <td class="time"></td>
+        </tr>
+    </template>
 </html>

@@ -2,7 +2,8 @@
 
 const MAX_GUESSES = 6;
 const WORD_LENGTH = 5;
-const LENGTH_OF_KEYBOARD_ANIM = 1;
+const LENGTH_OF_KEYBOARD_ANIM = 1 * 1000;
+const SHRINK_TIME = 0.3 * 1000;
 const API_URL = "https://beautiful-mica-sundial.glitch.me";
 
 class Game {
@@ -170,8 +171,8 @@ class Game {
         const allowSubmit = this.#guessedSinceSave;
         setTimeout(() => {
             keyboard.remove();
-            createScoreboard(victory, allowSubmit, this.#guessNumber);
-        }, LENGTH_OF_KEYBOARD_ANIM * 1000);
+            createEndGamePlate(victory, allowSubmit, this.#guessNumber);
+        }, LENGTH_OF_KEYBOARD_ANIM);
     }
 }
 
@@ -208,23 +209,21 @@ function submitHighScore(e, numGuesses) {
     return false;
 }
 
-function createScoreboard(victory, allowSubmit, numGuesses) {
+function createScoreboard(parent) {
     const template = document.getElementById("scoreboardTemplate");
-    const parent = document.getElementById("container");
-
     const node = template.content.cloneNode(true);
+
     const title = node.querySelector(".title");
-    
-    const endGameMessage = node.querySelector(".endGameMessage");
-    endGameMessage.innerText = victory ? "Congratulations" : "Unlcuky";
+    const closeButton = node.querySelector("#closeHighScoresButton");
+    closeButton.onclick = () => {
+        parent.classList.add("shrink");
 
-    const inputForm = node.querySelector(".highScoreForm");
-    inputForm.onsubmit = e => {
-        submitHighScore(e, numGuesses);
-    }
-
-    if (!victory || !allowSubmit) {
-        inputForm.remove();
+        setTimeout(() => {
+            //destroy the scoreboard so it updates
+            //every time it's opened
+            parent.replaceChildren([]);
+            document.getElementById("gameContainer").classList.remove("shrink");
+        }, SHRINK_TIME);
     }
 
     parent.appendChild(node);
@@ -233,12 +232,19 @@ function createScoreboard(victory, allowSubmit, numGuesses) {
         .then(res => res.json())
         .then(highScores => {
             const template = document.getElementById("scoreEntryTemplate");
-            const scores = document.querySelector(".scores");
+            const scores = document.getElementById("scoresTable");
 
             const scoresFromToday = highScores.filter(({submitTime}) => isTimeFromToday(submitTime));
 
             // Flip score order because server returns highest score first
-            scoresFromToday.sort((a, b) => a.score < b.score ? -1 : 1);
+            scoresFromToday.sort((a, b) => {
+                if (a.score !== b.score) {
+                    return a.score < b.score ? -1 : 1;
+                }
+                else {
+                    return a.time < b.time ? -1 : 1;
+                }
+            });
 
             for (const {name, score, submitTime} of scoresFromToday) {
                 const newNode = template.content.cloneNode(true);
@@ -254,12 +260,45 @@ function createScoreboard(victory, allowSubmit, numGuesses) {
 
             if (scoresFromToday.length > 0) {
                 title.innerText = "Today's Scores";
-                scores.classList.remove("hidden");
+                scores.classList.remove("shrink");
             }
             else {
                 title.innerText = "No scores submitted yet.";
             }
         });
+}
+
+function createEndGamePlate(victory, allowSubmit, numGuesses) {
+    const parent = document.getElementById("gameContainer");
+    const template = document.getElementById("endGameTemplate");
+
+    const node = template.content.cloneNode(true);
+    
+    const endGameMessage = node.querySelector(".endGameMessage");
+    endGameMessage.innerText = victory ? "Congratulations" : "Unlucky";
+
+    const inputForm = node.querySelector(".highScoreForm");
+    inputForm.onsubmit = e => {
+        submitHighScore(e, numGuesses);
+    }
+
+    const showHighScoresButton = node.querySelector("#showHighScoresButton");
+    const scoreboardContainer = document.getElementById("scoreboardContainer");
+    showHighScoresButton.onclick = () => {
+        parent.classList.add("shrink");
+
+        createScoreboard(scoreboardContainer);
+
+        setTimeout(()=>{
+            scoreboardContainer.classList.remove("shrink");
+        }, SHRINK_TIME);
+    };
+
+    if (!victory || !allowSubmit) {
+        inputForm.remove();
+    }
+
+    parent.appendChild(node);
 }
 
 function createKeyboard() {

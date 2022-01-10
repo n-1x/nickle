@@ -1,3 +1,7 @@
+:root {
+    --animTime: 0.3s;
+}
+
 body {
     background-color: #111;
     color: #fff;
@@ -12,9 +16,19 @@ body {
     height: 100%;
     display: flex;
     flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+#gameContainer {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: flex-start;
     padding-top: 1%;
+    transition: transform var(--animTime);
 }
 
 /*GUESSES*/
@@ -104,12 +118,11 @@ span.wordContains {
 }
 
 span.keyboardKey.notInWord, .shrink {
-    transition: transform 0.3s;
     transform: scale(0);
 }
 
-/*SCOREBOARD*/
-#scoreboard {
+/*ENDGAME*/
+#endGame {
     text-align: center;
     font-size: 2rem;
     animation-name: slideUp;
@@ -119,6 +132,17 @@ span.keyboardKey.notInWord, .shrink {
 @keyframes slideUp {
     from { transform: translateY(700%); }
     to { transform: translateY(0%); }
+}
+
+/*SCOREBOARD*/
+#scoreboardContainer {
+    position: absolute;
+    top:20%;
+    left: auto;
+    right: auto;
+    bottom: auto;
+    text-align: center;
+    transition: transform var(--animTime);
 }
 
 /*MESSAGE*/
@@ -161,21 +185,21 @@ span.keyboardKey.notInWord, .shrink {
 
 /*HIGHSCORES*/
 
-.scores {
+#scoresTable {
     font-size: 1.5rem;
     margin-bottom: 1rem;
-    transition: opacity 0.3s;
+    transition: transform var(--animTime);
 }
 
-#scoreboard h2, h3 {
-    margin: 0 0 1% 0;
+h2, h3 {
+    margin: 0 0 1rem 0;
 }
 
-.scores th {
+#scoresTable th {
     text-align: left;
 }
 
-.scores td,th {
+#scoresTable td,th {
     padding-right: 2rem;
 }
 
@@ -183,19 +207,15 @@ span.keyboardKey.notInWord, .shrink {
     vertical-align: middle;
 }
 
-.submitScoreButton, .nameInput {
+button, input {
     font-size: 1.5rem;
     padding: 0.5rem;
-}
-
-.submitScoreButton {
     background-color: #555;
     color: white;
     border: none;
 }
 
-.nameInput {
-    background-color: #555;
-    color: white;
-    border: none;
+button:hover {
+    background-color: #333;
+    cursor: pointer;
 }
