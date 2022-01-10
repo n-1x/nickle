@@ -237,7 +237,8 @@ function createScoreboard(victory, allowSubmit, numGuesses) {
 
             const scoresFromToday = highScores.filter(({submitTime}) => isTimeFromToday(submitTime));
 
-            console.dir(scoresFromToday)
+            // Flip score order because server returns highest score first
+            scoresFromToday.sort((a, b) => a.score < b.score ? -1 : 1);
 
             for (const {name, score, submitTime} of scoresFromToday) {
                 const newNode = template.content.cloneNode(true);
