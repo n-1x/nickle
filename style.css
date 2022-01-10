@@ -53,8 +53,13 @@ body {
 
 /*KEYBOARD*/
 
+#keyboard {
+    width: 100%;
+}
+
 .keyboardRow {
     display: flex;
+    justify-content: center;
     gap: 0.5rem;
     margin-bottom: 0.5rem;
 }
