@@ -112,7 +112,7 @@ span.keyboardKey.notInWord, .shrink {
 }
 
 @keyframes slideUp {
-    from { transform: translateY(300%); }
+    from { transform: translateY(700%); }
     to { transform: translateY(0%); }
 }
 
@@ -120,7 +120,7 @@ span.keyboardKey.notInWord, .shrink {
 
 @keyframes fadeOut {
     0% { opacity: 100%; }
-    50% {opacity: 1000%; }
+    50% {opacity: 100%; }
     100% {opacity: 0%; }
 }
 
@@ -146,7 +146,7 @@ span.keyboardKey.notInWord, .shrink {
 
 .slideBottom {
     transition: transform 1s;
-    transform: translateY(300%);
+    transform: translateY(700%);
 }
 
 .hidden {
