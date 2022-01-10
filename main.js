@@ -339,7 +339,7 @@ function showMessage(text) {
 
 window.onload = () => {
     fetch("./wordlist.txt").then(res => res.text()).then(words => {
-        wordList = words.split("\r\n");
+        wordList = words.replace(/\r\n/g, "\n").toUpperCase().split("\n");
 
         const lastSaveTime = window.localStorage.getItem("lastSaveTime");
         let savedGuesses = [];
