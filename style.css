@@ -205,6 +205,11 @@ h2, h3 {
 
 .highScoreForm {
     vertical-align: middle;
+    margin: 0 0 0.5rem 0;
+}
+
+input {
+    max-width: 18ch;
 }
 
 button, input {

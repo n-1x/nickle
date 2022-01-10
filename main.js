@@ -223,7 +223,7 @@ function submitHighScore(e, numGuesses) {
     const name = e.target.querySelector("input").value;
 
     if (name.length < 5) {
-        showMessage("Name must be at least five characters");
+        showMessage("Five characters minimum");
     }
     else {
         showMessage("Submitting score");
