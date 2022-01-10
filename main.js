@@ -123,7 +123,7 @@ class Game {
     
     makeGuess(word) {
         const upWord = word.toUpperCase();
-        
+
         if (upWord.length !== WORD_LENGTH) {
             showMessage("Guess must be five characters")
             return;
@@ -170,7 +170,7 @@ class Game {
         const allowSubmit = this.#guessedSinceSave;
         setTimeout(() => {
             keyboard.remove();
-            createScoreboard(victory, allowSubmit, this.#guessNumber - 1);
+            createScoreboard(victory, allowSubmit, this.#guessNumber);
         }, LENGTH_OF_KEYBOARD_ANIM * 1000);
     }
 }
