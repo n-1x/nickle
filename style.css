@@ -209,6 +209,7 @@ h2, h3 {
 
 button, input {
     font-size: 1.5rem;
+    margin: 0.5rem;
     padding: 0.5rem;
     background-color: #555;
     color: white;

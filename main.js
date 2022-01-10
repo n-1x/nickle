@@ -174,6 +174,34 @@ class Game {
             createEndGamePlate(victory, allowSubmit, this.#guessNumber);
         }, LENGTH_OF_KEYBOARD_ANIM);
     }
+
+    getBoardState() {
+        const state = [];
+
+        for (const row of this.#guessRows) {
+            const stateRow = [];
+
+            for (const el of row.querySelectorAll(".guessChar")) {
+                if (el.classList.contains("correctPosition")) {
+                    stateRow.push(2);
+                }
+                else if (el.classList.contains("wordContains")) {
+                    stateRow.push(1);
+                }
+                else {
+                    stateRow.push(0);
+                }
+            }
+
+            if (stateRow.reduce((prev, current) => {
+                return prev + current;
+            }) > 0) {
+                state.push(stateRow);
+            }
+        }
+
+        return state;
+    }
 }
 
 let currentGame = null;
@@ -280,6 +308,16 @@ function createEndGamePlate(victory, allowSubmit, numGuesses) {
     const inputForm = node.querySelector(".highScoreForm");
     inputForm.onsubmit = e => {
         submitHighScore(e, numGuesses);
+    }
+
+    const shareButton = node.querySelector(".shareButton");
+    shareButton.onclick = () => {
+        const emojiArray = ["⬛", "🟨", "🟩"];
+        const emojiBoard = currentGame.getBoardState()
+            .map(row => row.map(i => emojiArray[i]).join("")).join("\n");
+
+        navigator.clipboard.writeText(`Nickle ${(new Date()).toLocaleDateString()}\n\n${emojiBoard}`);
+        showMessage("Copied to clipboard");
     }
 
     const showHighScoresButton = node.querySelector("#showHighScoresButton");
