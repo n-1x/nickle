@@ -338,7 +338,7 @@ function showMessage(text) {
 }
 
 window.onload = () => {
-    fetch("wordlist.txt").then(res => res.text()).then(words => {
+    fetch("/wordlist.txt").then(res => res.text()).then(words => {
         wordList = words.split("\r\n");
 
         const lastSaveTime = window.localStorage.getItem("lastSaveTime");
