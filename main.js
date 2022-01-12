@@ -140,8 +140,8 @@ class Game {
         this.#updateClassesIf(unusedChars, "notInWord", char => !this.#targetWord.includes(char));
         
         this.#guesses.push(upWord);
-        window.localStorage.setItem("guesses", JSON.stringify(this.#guesses));
-        window.localStorage.setItem("lastSaveTime", Date.now());
+        window.localStorage.guesses = JSON.stringify(this.#guesses);
+        window.localStorage.lastSaveTime = Date.now();
 
         ++this.#guessNumber;
         if (unusedChars.length === 0) {
@@ -297,7 +297,13 @@ function createEndGamePlate(victory, numGuesses) {
     const inputForm = node.querySelector(".highScoreForm");
     inputForm.onsubmit = e => {
         submitHighScore(e, numGuesses);
-        window.localStorage.setItem("submittedHighScore", true);
+        window.localStorage.submittedHighScore = true;
+    }
+
+    const nameInput = node.querySelector(".nameInput");
+    nameInput.value = window.localStorage.name;
+    nameInput.onchange = e => {
+        window.localStorage.name = e.target.value
     }
 
     const shareButton = node.querySelector(".shareButton");
@@ -331,7 +337,7 @@ function createEndGamePlate(victory, numGuesses) {
     }
 
     // for when user visits page after finishing the game
-    if (!victory || window.localStorage.getItem("submittedHighScore")) {
+    if (!victory || window.localStorage.submittedHighScore) {
         inputForm.remove();
     }
 
@@ -420,14 +426,15 @@ window.onload = () => {
     fetch("./wordlist.txt").then(res => res.text()).then(words => {
         wordList = words.replace(/\r\n/g, "\n").toUpperCase().split("\n");
 
-        const lastSaveTime = window.localStorage.getItem("lastSaveTime");
+        const {lastSaveTime, name, guesses} = window.localStorage;
         let savedGuesses = [];
 
         if (isTimeFromToday(lastSaveTime)) {
-            savedGuesses = JSON.parse(window.localStorage.getItem("guesses"));
+            savedGuesses = JSON.parse(guesses);
         }
         else {
             window.localStorage.clear();
+            window.localStorage.name = name;
         }
         
         createKeyboard();
