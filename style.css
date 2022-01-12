@@ -78,7 +78,7 @@ body {
     margin-bottom: 0.5rem;
 }
 
-.keyboardkey {
+.keyboardKey {
     background-color: #555;
     border-radius: 15%;
     width: 4rem;
@@ -88,11 +88,10 @@ body {
     align-items: center;
     cursor: pointer;
     user-select: none;
-
     transition: background-color 0.1s;
 }
 
-.keyboardkey:hover {
+.keyboardKey:hover {
     background-color: #444;
 }
 
