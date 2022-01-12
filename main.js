@@ -14,7 +14,6 @@ class Game {
     #targetWord;
     #guesses = [];
     #gameOver = false;
-    #guessedSinceSave = false;
 
     constructor(initialGuesses) {
         this.#guessRows = document.querySelectorAll(".guessRow");
@@ -22,18 +21,12 @@ class Game {
         this.setTargetWord();
 
         if (initialGuesses) {
-            // Stop these auto guesses counting as a new finish.
-            // Used to hide the name input on the scoreboard
-            this.#guessedSinceSave = false;
-
             for (const guess of initialGuesses) {
                 for (const char of guess) {
                     this.addChar(char, true);
                 }
                 this.submitWord();
             }
-
-            this.#guessedSinceSave = true;
         }
     }
     
@@ -168,10 +161,9 @@ class Game {
         const keyboard = document.getElementById("keyboard");
         keyboard.classList.add("slideBottom");
 
-        const allowSubmit = this.#guessedSinceSave;
         setTimeout(() => {
             keyboard.remove();
-            createEndGamePlate(victory, allowSubmit, this.#guessNumber);
+            createEndGamePlate(victory, this.#guessNumber);
         }, LENGTH_OF_KEYBOARD_ANIM);
     }
 
@@ -293,7 +285,7 @@ function createScoreboard(parent) {
         });
 }
 
-function createEndGamePlate(victory, allowSubmit, numGuesses) {
+function createEndGamePlate(victory, numGuesses) {
     const parent = document.getElementById("gameContainer");
     const template = document.getElementById("endGameTemplate");
 
@@ -305,6 +297,7 @@ function createEndGamePlate(victory, allowSubmit, numGuesses) {
     const inputForm = node.querySelector(".highScoreForm");
     inputForm.onsubmit = e => {
         submitHighScore(e, numGuesses);
+        window.localStorage.setItem("submittedHighScore", true);
     }
 
     const shareButton = node.querySelector(".shareButton");
@@ -338,7 +331,7 @@ function createEndGamePlate(victory, allowSubmit, numGuesses) {
     }
 
     // for when user visits page after finishing the game
-    if (!victory || !allowSubmit) {
+    if (!victory || window.localStorage.getItem("submittedHighScore")) {
         inputForm.remove();
     }
 
