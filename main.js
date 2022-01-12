@@ -148,7 +148,7 @@ class Game {
         
         this.#guesses.push(upWord);
         window.localStorage.setItem("guesses", JSON.stringify(this.#guesses));
-        window.localStorage.setItem("lastSaveTime", (new Date()).getTime());
+        window.localStorage.setItem("lastSaveTime", Date.now());
 
         ++this.#guessNumber;
         if (unusedChars.length === 0) {
@@ -204,9 +204,10 @@ let currentGame = null;
 let wordList = null;
 let message = null;
 const keyMap = {}; // maps key text to a dom node
+const startTime = new Date();
 
 function isTimeFromToday(aTime) {
-    const date = new Date(parseInt(aTime));
+    const date = aTime instanceof Date ? aTime : new Date(parseInt(aTime));
     const now = new Date();
 
     return date.getFullYear() === now.getFullYear()
@@ -225,7 +226,7 @@ function submitHighScore(e, numGuesses) {
         showMessage("Submitting score");
         e.target.classList.add("shrink");
 
-        fetch(`${API_URL}?game=nickle&score=${numGuesses}&name=${name}`, {
+        fetch(`${API_URL}?game=nickle&daily=true&score=${numGuesses}&name=${name}`, {
             method: "PUT"
         });
     }
@@ -328,6 +329,15 @@ function createEndGamePlate(victory, allowSubmit, numGuesses) {
         }, SHRINK_TIME);
     };
 
+    const startedToday = isTimeFromToday(startTime);
+    if (!startedToday) {
+        showHighScoresButton.remove();
+        shareButton.remove();
+        inputForm.remove();
+        endGameMessage.innerText = "Refresh to play today's game";
+    }
+
+    // for when user visits page after finishing the game
     if (!victory || !allowSubmit) {
         inputForm.remove();
     }
