@@ -301,7 +301,7 @@ function createEndGamePlate(victory, numGuesses) {
     }
 
     const nameInput = node.querySelector(".nameInput");
-    nameInput.value = window.localStorage.name;
+    nameInput.value = window.localStorage.name || "";
     nameInput.onchange = e => {
         window.localStorage.name = e.target.value
     }
