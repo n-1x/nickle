@@ -227,17 +227,58 @@ function submitHighScore(e, numGuesses) {
 
         fetch(`${API_URL}?game=nickle&daily=true&score=${numGuesses}&name=${name}`, {
             method: "PUT"
+        }).then(() => {
+            updateScoresTable();
         });
     }
 
     return false;
 }
 
+async function updateScoresTable() {
+    const highScores = await (await fetch(`${API_URL}?game=nickle`)).json();
+    const template = document.getElementById("scoreEntryTemplate");
+    const scoresTable = document.getElementById("scoresTable");
+    const tableRows = scoresTable.querySelector("tbody");
+    const scoresFromToday = highScores.filter(({submitTime}) => isTimeFromToday(submitTime));
+    const title = document.querySelector("#scoreboardContainer .title");
+    
+    // Flip score order because server returns highest score first
+    scoresFromToday.sort((a, b) => {
+        if (a.score !== b.score) {
+            return a.score < b.score ? -1 : 1;
+        }
+        else {
+            return a.time < b.time ? -1 : 1;
+        }
+    });
+    
+    tableRows.replaceChildren([]); //remove existing children
+    for (const {name, score, submitTime} of scoresFromToday) {
+        const newNode = template.content.cloneNode(true);
+        const nameEl = newNode.querySelector(".name");
+        const numGuessesEl = newNode.querySelector(".numGuesses");
+        const timeEl = newNode.querySelector(".time");
+
+        nameEl.innerText = name;
+        numGuessesEl.innerText = score;
+        timeEl.innerText = (new Date(parseInt(submitTime))).toLocaleTimeString();
+        tableRows.appendChild(newNode);
+    }
+
+    if (scoresFromToday.length > 0) {
+        title.innerText = "Today's Scores";
+        scoresTable.classList.remove("shrink");
+    }
+    else {
+        title.innerText = "No scores submitted yet.";
+    }
+}
+
 function createScoreboard(parent) {
     const template = document.getElementById("scoreboardTemplate");
     const node = template.content.cloneNode(true);
 
-    const title = node.querySelector(".title");
     const closeButton = node.querySelector("#closeHighScoresButton");
     closeButton.onclick = () => {
         parent.classList.add("shrink");
@@ -251,45 +292,7 @@ function createScoreboard(parent) {
     }
 
     parent.appendChild(node);
-
-    fetch(`${API_URL}?game=nickle`)
-        .then(res => res.json())
-        .then(highScores => {
-            const template = document.getElementById("scoreEntryTemplate");
-            const scores = document.getElementById("scoresTable");
-
-            const scoresFromToday = highScores.filter(({submitTime}) => isTimeFromToday(submitTime));
-
-            // Flip score order because server returns highest score first
-            scoresFromToday.sort((a, b) => {
-                if (a.score !== b.score) {
-                    return a.score < b.score ? -1 : 1;
-                }
-                else {
-                    return a.time < b.time ? -1 : 1;
-                }
-            });
-
-            for (const {name, score, submitTime} of scoresFromToday) {
-                const newNode = template.content.cloneNode(true);
-                const nameEl = newNode.querySelector(".name");
-                const numGuessesEl = newNode.querySelector(".numGuesses");
-                const timeEl = newNode.querySelector(".time");
-
-                nameEl.innerText = name;
-                numGuessesEl.innerText = score;
-                timeEl.innerText = (new Date(parseInt(submitTime))).toLocaleTimeString();
-                scores.appendChild(newNode);
-            }
-
-            if (scoresFromToday.length > 0) {
-                title.innerText = "Today's Scores";
-                scores.classList.remove("shrink");
-            }
-            else {
-                title.innerText = "No scores submitted yet.";
-            }
-        });
+    updateScoresTable();
 }
 
 function createEndGamePlate(victory, numGuesses) {
