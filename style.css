@@ -56,7 +56,7 @@ body {
     user-select: none;
 }
 
-.submitted {
+.notInWord {
     background-color: rgb(61, 61, 61);
 }
 
@@ -108,7 +108,8 @@ body {
 }
 
 /*HINTS*/
-span.correctPosition {
+/* this rule has a more specific version for the keyboard so it overrides wordContains */
+span.correctPosition, span.keyboardKey.correctPosition {
     background-color: rgb(40, 141, 40);
 }
 
