@@ -6,6 +6,19 @@ const LENGTH_OF_KEYBOARD_ANIM = 1 * 1000;
 const SHRINK_TIME = 0.3 * 1000;
 const API_URL = "https://beautiful-mica-sundial.glitch.me";
 
+//game won't start until these promises resolve
+const g_initPromises = [
+    fetch("./wordlist.txt").then(res => res.text()),
+    fetch("./wordlist_guesses.txt").then(res => res.text())
+];
+
+let g_currentGame = null;
+let g_wordList = null;  //words that could be chosen as the target
+let g_guessList = null; //allowed guesses
+let g_MessageElement = null;
+const g_keyMap = {}; // maps key text to a dom node
+const g_startTime = new Date();
+
 class Game {
     #guessRows;
     #currentRow;
@@ -44,8 +57,8 @@ class Game {
 
         const now = new Date();
         const seed = parseInt(`${now.getFullYear()}${now.getMonth()}${now.getDate()}`);
-        const randIndex = Math.floor(rand(seed) * wordList.length);
-        this.#targetWord = wordList[randIndex].toUpperCase();
+        const randIndex = Math.floor(rand(seed) * g_wordList.length);
+        this.#targetWord = g_wordList[randIndex].toUpperCase();
     }
 
     addChar(char, skipBounce = false) {
@@ -59,7 +72,7 @@ class Game {
             return;
         }
 
-        if (keyMap[upChar].classList.contains("notInWord")) {
+        if (g_keyMap[upChar].classList.contains("notInWord")) {
             return;
         }
 
@@ -68,7 +81,7 @@ class Game {
 
         if (!skipBounce) {
             charElement.classList.add("bounce");
-            keyMap[upChar].classList.add("bounce");
+            g_keyMap[upChar].classList.add("bounce");
         }
         ++this.#charNumber;
     }
@@ -103,7 +116,7 @@ class Game {
                 // Correct position class cannot be overridden
                 if (!guessCharElement.classList.contains("correctPosition")) {
                     guessCharElement.classList.add(className);
-                    keyMap[guessChar].classList.add(className);
+                    g_keyMap[guessChar].classList.add(className);
 
                     // remove char from unused list
                     const unusedIndex = unusedChars.indexOf(guessChar);
@@ -123,7 +136,7 @@ class Game {
             return;
         }
         
-        if (!wordList.includes(upWord)) {
+        if (!g_guessList.includes(upWord)) {
             showMessage("Not in word list");
             return;
         }
@@ -191,12 +204,6 @@ class Game {
         return state;
     }
 }
-
-let currentGame = null;
-let wordList = null;
-let message = null;
-const keyMap = {}; // maps key text to a dom node
-const startTime = new Date();
 
 function isTimeFromToday(aTime) {
     const date = aTime instanceof Date ? aTime : new Date(parseInt(aTime));
@@ -301,7 +308,7 @@ function createEndGamePlate(victory, numGuesses) {
     }
 
     const nameInput = node.querySelector(".nameInput");
-    nameInput.value = window.localStorage.name || "";
+    nameInput.value = window.localStorage.name;
     nameInput.onchange = e => {
         window.localStorage.name = e.target.value
     }
@@ -309,7 +316,7 @@ function createEndGamePlate(victory, numGuesses) {
     const shareButton = node.querySelector(".shareButton");
     shareButton.onclick = () => {
         const emojiArray = ["⬛", "🟨", "🟩"];
-        const emojiBoard = currentGame.getBoardState()
+        const emojiBoard = g_currentGame.getBoardState()
             .map(row => row.map(i => emojiArray[i-1]).join("")).join("\n");
 
         navigator.clipboard.writeText(`Nickle ${(new Date()).toLocaleDateString()}\n\n${emojiBoard}`);
@@ -328,7 +335,7 @@ function createEndGamePlate(victory, numGuesses) {
         }, SHRINK_TIME);
     };
 
-    const startedToday = isTimeFromToday(startTime);
+    const startedToday = isTimeFromToday(g_startTime);
     if (!startedToday) {
         showHighScoresButton.remove();
         shareButton.remove();
@@ -357,7 +364,7 @@ function createKeyboard() {
         element.classList.add("keyboardKey");
         element.innerText = text;
         element.id = text;
-        keyMap[text] = element;
+        g_keyMap[text] = element;
         element.onanimationend = () => {
             element.classList.remove("bounce");
         }
@@ -374,7 +381,7 @@ function createKeyboard() {
             const enterKey = createKey("Guess");
             enterKey.classList.add("enterKey");
             enterKey.onclick = () => {
-                currentGame.submitWord();
+                g_currentGame.submitWord();
             };
             rowDiv.appendChild(enterKey);
         }
@@ -382,7 +389,7 @@ function createKeyboard() {
         for (const char of row) {
             const key = createKey(char);
             key.onclick = () => {
-                currentGame.addChar(char);
+                g_currentGame.addChar(char);
             };
             rowDiv.appendChild(key);
         }
@@ -391,7 +398,7 @@ function createKeyboard() {
             const backspaceKey = createKey("<==");
             backspaceKey.classList.add("backspaceKey");
             backspaceKey.onclick = () => {
-                currentGame.delChar();
+                g_currentGame.delChar();
             };
             rowDiv.appendChild(backspaceKey);
         }
@@ -418,44 +425,57 @@ function createGuessBoxes() {
 }
 
 function showMessage(text) {
-    message.innerText = text;
-    message.classList.add("animate");
+    g_MessageElement.innerText = text;
+    g_MessageElement.classList.add("animate");
 }
 
-window.onload = () => {
-    fetch("./wordlist.txt").then(res => res.text()).then(words => {
-        wordList = words.replace(/\r\n/g, "\n").toUpperCase().split("\n");
+window.onload = async () => {
+    const results = await Promise.all(g_initPromises);
+    [g_wordList, g_guessList] = results.map(a => a.replaceAll(/[\r\n]+/g, "\n").toUpperCase().split("\n"));
 
-        const {lastSaveTime, name, guesses} = window.localStorage;
-        let savedGuesses = [];
+    const {lastSaveTime, guesses} = window.localStorage;
+    const name = window.localStorage.name || g_guessList[Math.floor(Math.random() * g_guessList.length)];
 
-        if (isTimeFromToday(lastSaveTime)) {
-            savedGuesses = JSON.parse(guesses);
-        }
-        else {
-            window.localStorage.clear();
-            window.localStorage.name = name;
-        }
-        
-        createKeyboard();
-        createGuessBoxes();
-        currentGame = new Game(savedGuesses);
-    });
+    let savedGuesses = [];
 
-    message = document.getElementById("message");
-    message.onanimationend = () => {
-        message.classList.remove("animate");
+    if (isTimeFromToday(lastSaveTime)) {
+        savedGuesses = JSON.parse(guesses);
+    }
+    else {
+        window.localStorage.clear();
+        window.localStorage.name = name; // restore name
+    }
+    
+    createKeyboard();
+    createGuessBoxes();
+    g_currentGame = new Game(savedGuesses);
+
+    g_MessageElement = document.getElementById("message");
+    g_MessageElement.onanimationend = () => {
+        g_MessageElement.classList.remove("animate");
     }
 }
 
 window.onkeydown = e => {
     if (e.key >= "a" && e.key <= "z") {
-        currentGame.addChar(e.key);
-    }
-    else if (e.key === "Backspace") {
-        currentGame.delChar();
+        g_currentGame.addChar(e.key);
     }
     else if (e.key === "Enter") {
-        currentGame.submitWord();
+        g_currentGame.submitWord();
+    }
+    else if (e.key === "Backspace") {
+        g_currentGame.delChar();
+    }
+
+    if ((new URL(window.location)).hostname === "localhost") {
+        switch(e.key) {
+            case "1": 
+                window.localStorage.clear();
+                break;
+
+            case "2" :
+                window.location = window.location;
+                break;
+        }
     }
 }
