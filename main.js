@@ -113,16 +113,18 @@ class Game {
             guessCharElement.classList.add("submitted");
 
             if (predicate(guessChar, i)) {
-                // Correct position class cannot be overridden
-                if (!guessCharElement.classList.contains("correctPosition")) {
-                    guessCharElement.classList.add(className);
-                    g_keyMap[guessChar].classList.add(className);
+                guessCharElement.classList.remove("wordContains");
+                guessCharElement.classList.add(className);
 
-                    // remove char from unused list
-                    const unusedIndex = unusedChars.indexOf(guessChar);
-                    if (unusedIndex >= 0) {
-                        unusedChars.splice(unusedIndex, 1);
-                    }
+                const keyElement = g_keyMap[guessChar];
+                // remove word contains from key so it can be overriden with correctPosition
+                keyElement.classList.remove("wordContains");
+                keyElement.classList.add(className);
+
+                // remove char from unused list
+                const unusedIndex = unusedChars.indexOf(guessChar);
+                if (unusedIndex >= 0) {
+                    unusedChars.splice(unusedIndex, 1);
                 }
             }
         });
