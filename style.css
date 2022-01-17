@@ -157,6 +157,7 @@ span.keyboardKey.notInWord, .shrink {
     font-size: 2rem;
     height: 2rem;
     margin: 0.5% 0;
+    user-select: none;
 }
 
 #message.animate {
