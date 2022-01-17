@@ -284,7 +284,7 @@ function createScoreboard(parent) {
     const closeButton = node.querySelector("#closeHighScoresButton");
     closeButton.onclick = () => {
         parent.classList.add("shrink");
-
+        
         setTimeout(() => {
             //destroy the scoreboard so it updates
             //every time it's opened
@@ -292,7 +292,8 @@ function createScoreboard(parent) {
             document.getElementById("gameContainer").classList.remove("shrink");
         }, SHRINK_TIME);
     }
-
+    
+    document.activeElement.blur();
     parent.appendChild(node);
     updateScoresTable();
 }
