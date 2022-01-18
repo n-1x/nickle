@@ -159,7 +159,7 @@ class Game {
         window.localStorage.lastSaveTime = Date.now();
 
         ++this.#guessNumber;
-        if (unusedChars.length === 0) {
+        if (word === this.#targetWord) {
             this.#endGame(true);
         }
         else if (this.#guessNumber === MAX_GUESSES) {
