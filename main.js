@@ -64,7 +64,7 @@ class Game {
         const now = new Date();
         const seed = parseInt(`${now.getFullYear()}${now.getMonth()}${now.getDate()}`);
         const randIndex = Math.floor(rand(seed) * g_wordList.length);
-        this.#targetWord = "CLUCK"//g_wordList[randIndex].toUpperCase();
+        this.#targetWord = g_wordList[randIndex].toUpperCase();
     }
 
     addChar(char, skipBounce = false) {
