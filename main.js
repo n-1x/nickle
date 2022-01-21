@@ -181,10 +181,10 @@ class Game {
             const stateRow = [];
 
             for (const el of row.querySelectorAll(".submitted")) {
-                if (el.classList.contains("correctPosition")) {
+                if (el.classList.contains(hintClass.correctPosition)) {
                     stateRow.push(3);
                 }
-                else if (el.classList.contains("wordContains")) {
+                else if (el.classList.contains(hintClass.wordContains)) {
                     stateRow.push(2);
                 }
                 else {
