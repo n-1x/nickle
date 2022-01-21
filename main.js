@@ -12,12 +12,18 @@ const g_initPromises = [
     fetch("./wordlist_guesses.txt").then(res => res.text())
 ];
 
+const g_keyMap = {}; // maps key text to a dom node
 let g_currentGame = null;
 let g_wordList = null;  //words that could be chosen as the target
 let g_guessList = null; //allowed guesses
 let g_MessageElement = null;
-const g_keyMap = {}; // maps key text to a dom node
-const g_startTime = new Date();
+let g_startTime = window.localStorage.startTime || Date.now();
+
+const hintClass = {
+    wordContains: "wordContains",
+    correctPosition: "correctPosition",
+    notInWord: "notInWord"
+}
 
 class Game {
     #guessRows;
@@ -58,7 +64,7 @@ class Game {
         const now = new Date();
         const seed = parseInt(`${now.getFullYear()}${now.getMonth()}${now.getDate()}`);
         const randIndex = Math.floor(rand(seed) * g_wordList.length);
-        this.#targetWord = g_wordList[randIndex].toUpperCase();
+        this.#targetWord = "CLUCK"//g_wordList[randIndex].toUpperCase();
     }
 
     addChar(char, skipBounce = false) {
@@ -106,29 +112,6 @@ class Game {
         const word = this.#currentRow.map(element => element.innerText).join("");
         this.makeGuess(word);
     }
-
-    #updateClassesIf(unusedChars, className, predicate) {
-        this.#currentRow.forEach((guessCharElement, i) => {
-            const guessChar = guessCharElement.innerText;
-            guessCharElement.classList.add("submitted");
-
-            if (predicate(guessChar, i)) {
-                guessCharElement.classList.remove("wordContains");
-                guessCharElement.classList.add(className);
-
-                const keyElement = g_keyMap[guessChar];
-                // remove word contains from key so it can be overriden with correctPosition
-                keyElement.classList.remove("wordContains");
-                keyElement.classList.add(className);
-
-                // remove char from unused list
-                const unusedIndex = unusedChars.indexOf(guessChar);
-                if (unusedIndex >= 0) {
-                    unusedChars.splice(unusedIndex, 1);
-                }
-            }
-        });
-    }
     
     makeGuess(word) {
         const upWord = word.toUpperCase();
@@ -143,20 +126,29 @@ class Game {
             return;
         }
 
-        // characters from the target word that haven't been either
-        // contained or matched yet.
-        const unusedChars = this.#targetWord.split("");
+        const rules = [
+            [hintClass.correctPosition, (char, i) => this.#targetWord.charAt(i) === char],
+            [hintClass.wordContains, char => this.#targetWord.includes(char)],
+            [hintClass.notInWord, char => !this.#targetWord.includes(char)]
+        ];
 
-        // These stages are separate so that a letter will not be marked as 
-        // wordContains but then used for correctPosition when checking a 
-        // character later in the guess
-        this.#updateClassesIf(unusedChars, "correctPosition", (char, i) => this.#targetWord.charAt(i) === char);
-        this.#updateClassesIf(unusedChars, "wordContains", char => unusedChars.includes(char));
-        this.#updateClassesIf(unusedChars, "notInWord", char => !this.#targetWord.includes(char));
+        rules.reduce((prevReturn, [className, predicate]) => {
+            return prevReturn.filter((guessCharElement, i) => {
+                const char = guessCharElement.innerText;
+                const match = predicate(char, i);
+                guessCharElement.classList.add("submitted");
+                
+                if (match) {
+                    guessCharElement.classList.add(className);
+                    g_keyMap[char].classList.add(className);
+                }
+    
+                return !match;
+            });
+        }, this.#currentRow);
         
         this.#guesses.push(upWord);
         window.localStorage.guesses = JSON.stringify(this.#guesses);
-        window.localStorage.lastSaveTime = Date.now();
 
         ++this.#guessNumber;
         if (word === this.#targetWord) {
@@ -208,7 +200,7 @@ class Game {
 }
 
 function isTimeFromToday(aTime) {
-    const date = aTime instanceof Date ? aTime : new Date(parseInt(aTime));
+    const date = new Date(parseInt(aTime));
     const now = new Date();
 
     return date.getFullYear() === now.getFullYear()
@@ -341,8 +333,7 @@ function createEndGamePlate(victory, numGuesses) {
         }, SHRINK_TIME);
     };
 
-    const startedToday = isTimeFromToday(g_startTime);
-    if (!startedToday) {
+    if (!isTimeFromToday(g_startTime)) {
         showHighScoresButton.remove();
         shareButton.remove();
         inputForm.remove();
@@ -439,17 +430,20 @@ window.onload = async () => {
     const results = await Promise.all(g_initPromises);
     [g_wordList, g_guessList] = results.map(a => a.replaceAll(/[\r\n]+/g, "\n").toUpperCase().split("\n"));
 
-    const {lastSaveTime, guesses} = window.localStorage;
+    const {guesses} = window.localStorage;
     const name = window.localStorage.name || g_guessList[Math.floor(Math.random() * g_guessList.length)];
 
-    let savedGuesses = [];
-
-    if (isTimeFromToday(lastSaveTime)) {
-        savedGuesses = JSON.parse(guesses);
-    }
-    else {
+    let savedGuesses = null;
+    
+    if (!isTimeFromToday(g_startTime)) {
         window.localStorage.clear();
         window.localStorage.name = name; // restore name
+
+        g_startTime = Date.now();
+        window.localStorage.startTime = g_startTime;
+    }
+    else if (guesses) {
+        savedGuesses = JSON.parse(guesses);
     }
     
     createKeyboard();

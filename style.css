@@ -108,7 +108,7 @@ body {
 }
 
 /*HINTS*/
-span.correctPosition {
+span.correctPosition, span.wordContains.correctPosition {
     background-color: rgb(40, 141, 40);
 }
 
