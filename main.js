@@ -17,7 +17,7 @@ let g_currentGame = null;
 let g_wordList = null;  //words that could be chosen as the target
 let g_guessList = null; //allowed guesses
 let g_MessageElement = null;
-let g_startTime = window.localStorage.startTime || Date.now();
+let g_startTime = window.localStorage.lastStartTime || Date.now();
 
 const hintClass = {
     wordContains: "wordContains",
@@ -306,9 +306,11 @@ function createEndGamePlate(victory, numGuesses) {
     }
 
     const nameInput = node.querySelector(".nameInput");
-    nameInput.value = window.localStorage.name;
+    if (window.localStorage.savedName) {
+        nameInput.value = window.localStorage.savedName;
+    }
     nameInput.onchange = e => {
-        window.localStorage.name = e.target.value
+        window.localStorage.savedName = e.target.value
     }
 
     const shareButton = node.querySelector(".shareButton");
@@ -430,17 +432,19 @@ window.onload = async () => {
     const results = await Promise.all(g_initPromises);
     [g_wordList, g_guessList] = results.map(a => a.replaceAll(/[\r\n]+/g, "\n").toUpperCase().split("\n"));
 
-    const {guesses} = window.localStorage;
-    const name = window.localStorage.name || g_guessList[Math.floor(Math.random() * g_guessList.length)];
+    const {lastStartTime, guesses, savedName} = window.localStorage;
 
     let savedGuesses = null;
     
-    if (!isTimeFromToday(g_startTime)) {
+    if (!isTimeFromToday(lastStartTime)) {
         window.localStorage.clear();
-        window.localStorage.name = name; // restore name
+
+        if (savedName) {
+            window.localStorage.savedName = savedName; // restore name
+        }
 
         g_startTime = Date.now();
-        window.localStorage.startTime = g_startTime;
+        window.localStorage.lastStartTime = g_startTime;
     }
     else if (guesses) {
         savedGuesses = JSON.parse(guesses);
