@@ -63,9 +63,9 @@ class Game {
         };
 
         const now = new Date();
-        const seed = parseInt(`${now.getFullYear()}${now.getMonth()}${now.getDate()}`);
-        const randIndex = Math.floor(rand(seed) * g_wordList.length + EXTRA_WORD_SEED);
-        this.#targetWord = g_wordList[randIndex].toUpperCase();
+        const seed = parseInt(`${now.getFullYear()}${now.getMonth()}${now.getDate()}`) + EXTRA_WORD_SEED;
+        const randIndex = Math.floor(rand(seed) * g_wordList.length);
+        this.#targetWord = "INANE"//g_wordList[randIndex].toUpperCase();
     }
 
     addChar(char, skipBounce = false) {
@@ -127,26 +127,31 @@ class Game {
             return;
         }
 
+        const target = this.#targetWord.split("");
+
         const rules = [
-            [hintClass.correctPosition, (char, i) => this.#targetWord.charAt(i) === char],
-            [hintClass.wordContains, char => this.#targetWord.includes(char)],
-            [hintClass.notInWord, char => !this.#targetWord.includes(char)]
+            [hintClass.correctPosition, (char, i) => target[i] === char],
+            [hintClass.wordContains, char => target.includes(char)],
+            [hintClass.notInWord, char => !target.includes(char)]
         ];
 
-        rules.reduce((prevReturn, [className, predicate]) => {
-            return prevReturn.filter((guessCharElement, i) => {
+        rules.forEach(([className, predicate]) => {
+            this.#currentRow.forEach((guessCharElement, i) => {
                 const char = guessCharElement.innerText;
-                const match = predicate(char, i);
                 guessCharElement.classList.add("submitted");
                 
-                if (match) {
+                if (predicate(char, i)) {
                     guessCharElement.classList.add(className);
                     g_keyMap[char].classList.add(className);
+
+                    // Once a letter is in correct position, it shouldn't
+                    // match any colour rules anymore
+                    if (className === hintClass.correctPosition) {
+                        target[i] = null;
+                    }
                 }
-    
-                return !match;
             });
-        }, this.#currentRow);
+        });
         
         this.#guesses.push(upWord);
         window.localStorage.guesses = JSON.stringify(this.#guesses);
