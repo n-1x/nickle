@@ -88,11 +88,11 @@ body {
     align-items: center;
     cursor: pointer;
     user-select: none;
-    transition: background-color 0.1s;
+    transition: opacity 0.1s;
 }
 
 .keyboardKey:hover {
-    background-color: #444;
+    opacity: 80%
 }
 
 .keyboardKey.enterKey {
