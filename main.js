@@ -5,6 +5,7 @@ const WORD_LENGTH = 5;
 const LENGTH_OF_KEYBOARD_ANIM = 1 * 1000;
 const SHRINK_TIME = 0.3 * 1000;
 const API_URL = "https://beautiful-mica-sundial.glitch.me";
+const EXTRA_WORD_SEED = 1; // Can be used to change today's word after an update
 
 //game won't start until these promises resolve
 const g_initPromises = [
@@ -63,7 +64,7 @@ class Game {
 
         const now = new Date();
         const seed = parseInt(`${now.getFullYear()}${now.getMonth()}${now.getDate()}`);
-        const randIndex = Math.floor(rand(seed) * g_wordList.length);
+        const randIndex = Math.floor(rand(seed) * g_wordList.length + EXTRA_WORD_SEED);
         this.#targetWord = g_wordList[randIndex].toUpperCase();
     }
 
