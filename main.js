@@ -62,15 +62,9 @@ class Game {
         };
 
         const now = new Date();
-<<<<<<< HEAD
         const seed = parseInt(`${now.getFullYear()}${now.getMonth()}${now.getDate()}`);
         const randIndex = Math.floor(rand(seed) * g_wordList.length);
         this.#targetWord = g_wordList[randIndex].toUpperCase();
-=======
-        const seed = parseInt(`${now.getFullYear()}${now.getMonth()}${now.getDate()}`) + EXTRA_WORD_SEED;
-        const randIndex = Math.floor(rand(seed) * g_wordList.length);
-        this.#targetWord = "INANE"//g_wordList[randIndex].toUpperCase();
->>>>>>> d2e97aa5795334dcedd3e72b83c3c30a15880818
     }
 
     addChar(char, skipBounce = false) {
