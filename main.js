@@ -5,7 +5,6 @@ const WORD_LENGTH = 5;
 const LENGTH_OF_KEYBOARD_ANIM = 1 * 1000;
 const SHRINK_TIME = 0.3 * 1000;
 const API_URL = "https://beautiful-mica-sundial.glitch.me";
-const EXTRA_WORD_SEED = 1; // Can be used to change today's word after an update
 
 //game won't start until these promises resolve
 const g_initPromises = [
@@ -45,7 +44,7 @@ class Game {
                 for (const char of guess) {
                     this.addChar(char, true);
                 }
-                this.submitWord();
+                this.makeGuess();
             }
         }
     }
@@ -64,7 +63,7 @@ class Game {
 
         const now = new Date();
         const seed = parseInt(`${now.getFullYear()}${now.getMonth()}${now.getDate()}`);
-        const randIndex = Math.floor(rand(seed) * g_wordList.length + EXTRA_WORD_SEED);
+        const randIndex = Math.floor(rand(seed) * g_wordList.length);
         this.#targetWord = g_wordList[randIndex].toUpperCase();
     }
 
@@ -110,45 +109,49 @@ class Game {
             return;
         }
 
-        const word = this.#currentRow.map(element => element.innerText).join("");
-        this.makeGuess(word);
+        this.makeGuess();
     }
     
-    makeGuess(word) {
-        const upWord = word.toUpperCase();
+    makeGuess() {
+        const guessChars = this.#currentRow.map(el => el.innerText);
+        const word = guessChars.join("");
 
-        if (upWord.length !== WORD_LENGTH) {
+        if (word.length !== WORD_LENGTH) {
             showMessage("Guess must be five characters")
             return;
         }
         
-        if (!g_guessList.includes(upWord)) {
+        if (!g_guessList.includes(word)) {
             showMessage("Not in word list");
             return;
         }
 
-        const rules = [
-            [hintClass.correctPosition, (char, i) => this.#targetWord.charAt(i) === char],
-            [hintClass.wordContains, char => this.#targetWord.includes(char)],
-            [hintClass.notInWord, char => !this.#targetWord.includes(char)]
-        ];
-
-        rules.reduce((prevReturn, [className, predicate]) => {
-            return prevReturn.filter((guessCharElement, i) => {
-                const char = guessCharElement.innerText;
-                const match = predicate(char, i);
-                guessCharElement.classList.add("submitted");
-                
-                if (match) {
-                    guessCharElement.classList.add(className);
-                    g_keyMap[char].classList.add(className);
-                }
-    
-                return !match;
-            });
-        }, this.#currentRow);
+        const target = this.#targetWord.split("");
         
-        this.#guesses.push(upWord);
+        guessChars.forEach((guessChar, i) => {
+            const guessCharEl = this.#currentRow[i];
+            guessCharEl.classList.add("submitted");
+
+            if (target[i] === guessChar) {
+                guessCharEl.classList.add(hintClass.correctPosition);
+                g_keyMap[guessChar].classList.add(hintClass.correctPosition);
+
+                target[i] = null;
+            }
+            else if (!target.includes(guessChar)) {
+                guessCharEl.classList.add(hintClass.notInWord);
+                g_keyMap[guessChar].classList.add(hintClass.notInWord);
+            }
+        });
+
+        guessChars.forEach((guessChar, i) => {
+            if (target.includes(guessChar)) {
+                this.#currentRow[i].classList.add(hintClass.wordContains);
+                g_keyMap[guessChar].classList.add(hintClass.wordContains);
+            }
+        });
+        
+        this.#guesses.push(word);
         window.localStorage.guesses = JSON.stringify(this.#guesses);
 
         ++this.#guessNumber;
