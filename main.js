@@ -1,4 +1,6 @@
-"use strict"
+// word colouring test cases (correct word/[guesses])
+// sprig/sours - shouldn't mark the last S as not in word
+// cluck/[laugh, blurb] - the L should be green on the keyboard
 
 const MAX_GUESSES = 6;
 const WORD_LENGTH = 5;
@@ -127,20 +129,22 @@ class Game {
         }
 
         const target = this.#targetWord.split("");
-        
+
         guessChars.forEach((guessChar, i) => {
             const guessCharEl = this.#currentRow[i];
             guessCharEl.classList.add("submitted");
 
-            if (target[i] === guessChar) {
-                guessCharEl.classList.add(hintClass.correctPosition);
-                g_keyMap[guessChar].classList.add(hintClass.correctPosition);
-
-                target[i] = null;
-            }
-            else if (!target.includes(guessChar)) {
+            if (!target.includes(guessChar)) {
                 guessCharEl.classList.add(hintClass.notInWord);
                 g_keyMap[guessChar].classList.add(hintClass.notInWord);
+            }
+        });
+        
+        guessChars.forEach((guessChar, i) => {
+            if (target[i] === guessChar) {
+                this.#currentRow[i].classList.add(hintClass.correctPosition);
+                g_keyMap[guessChar].classList.add(hintClass.correctPosition);
+                target[i] = null;
             }
         });
 
