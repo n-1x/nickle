@@ -7,6 +7,7 @@ const WORD_LENGTH = 5;
 const LENGTH_OF_KEYBOARD_ANIM = 1 * 1000;
 const SHRINK_TIME = 0.3 * 1000;
 const API_URL = "https://beautiful-mica-sundial.glitch.me";
+const DEBUG_MODE = (new URL(window.location)).port === "8000";
 
 //game won't start until these promises resolve
 const g_initPromises = [
@@ -25,6 +26,20 @@ const hintClass = {
     wordContains: "wordContains",
     correctPosition: "correctPosition",
     notInWord: "notInWord"
+}
+
+function getGuessColours(guess, target) {
+    const guessChars = guess.split("");
+    const targetChars = target.split("");
+
+    const rules = [
+        [hintClass.correctPosition, (gc, gi) => targetChars[gi] === gc],
+        [hintClass.notInWord, gc => !targetChars.includes(gc)],
+        [hintClass.wordContains, (gc, gi) => targetChars.some((tc, ti) => ti >= gi && tc === gc && guessChars[ti] !== tc)],
+        [null, () => true]
+    ];
+
+    return guessChars.map((gc, gi) => rules.find(([_, rule]) => rule(gc, gi))[0]);
 }
 
 class Game {
@@ -115,51 +130,28 @@ class Game {
     }
     
     makeGuess() {
-        const guessChars = this.#currentRow.map(el => el.innerText);
-        const word = guessChars.join("");
+        const guess = this.#currentRow.map(el => el.innerText).join("");
 
-        if (word.length !== WORD_LENGTH) {
+        if (guess.length !== WORD_LENGTH) {
             showMessage("Guess must be five characters")
             return;
         }
         
-        if (!g_guessList.includes(word)) {
+        if (!g_guessList.includes(guess)) {
             showMessage("Not in word list");
             return;
         }
 
-        const target = this.#targetWord.split("");
-
-        guessChars.forEach((guessChar, i) => {
-            const guessCharEl = this.#currentRow[i];
-            guessCharEl.classList.add("submitted");
-
-            if (!target.includes(guessChar)) {
-                guessCharEl.classList.add(hintClass.notInWord);
-                g_keyMap[guessChar].classList.add(hintClass.notInWord);
-            }
+        getGuessColours(guess, this.#targetWord).forEach((colour, index) => {
+            this.#currentRow[index].classList.add("submitted", colour);
+            g_keyMap[guess[index]].classList.add(colour);
         });
         
-        guessChars.forEach((guessChar, i) => {
-            if (target[i] === guessChar) {
-                this.#currentRow[i].classList.add(hintClass.correctPosition);
-                g_keyMap[guessChar].classList.add(hintClass.correctPosition);
-                target[i] = null;
-            }
-        });
-
-        guessChars.forEach((guessChar, i) => {
-            if (target.includes(guessChar)) {
-                this.#currentRow[i].classList.add(hintClass.wordContains);
-                g_keyMap[guessChar].classList.add(hintClass.wordContains);
-            }
-        });
-        
-        this.#guesses.push(word);
+        this.#guesses.push(guess);
         window.localStorage.guesses = JSON.stringify(this.#guesses);
 
         ++this.#guessNumber;
-        if (word === this.#targetWord) {
+        if (guess === this.#targetWord) {
             this.#endGame(true);
         }
         else if (this.#guessNumber === MAX_GUESSES) {
@@ -188,7 +180,7 @@ class Game {
         for (const row of this.#guessRows) {
             const stateRow = [];
 
-            for (const el of row.querySelectorAll(".submitted")) {
+            for (const el of row.childNodes) {
                 if (el.classList.contains(hintClass.correctPosition)) {
                     stateRow.push(3);
                 }
@@ -479,7 +471,7 @@ window.onkeydown = e => {
         g_currentGame.delChar();
     }
 
-    if ((new URL(window.location)).hostname === "localhost") {
+    if (DEBUG_MODE) {
         switch(e.key) {
             case "1": 
                 window.localStorage.clear();
