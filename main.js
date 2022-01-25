@@ -35,7 +35,7 @@ function getGuessColours(guess, target) {
     const rules = [
         [hintClass.correctPosition, (gc, gi) => targetChars[gi] === gc],
         [hintClass.notInWord, gc => !targetChars.includes(gc)],
-        [hintClass.wordContains, (gc, gi) => targetChars.some((tc, ti) => ti >= gi && tc === gc && guessChars[ti] !== tc)],
+        [hintClass.wordContains, (gc, gi) => targetChars.some((tc, ti) => tc === gc && guessChars[ti] !== tc)],
         [null, () => true]
     ];
 
