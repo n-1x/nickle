@@ -136,7 +136,7 @@ span.keyboardKey.notInWord, .shrink {
 /*SCOREBOARD*/
 #scoreboardContainer {
     position: absolute;
-    top:20%;
+    top:10%;
     left: auto;
     right: auto;
     bottom: auto;
@@ -188,20 +188,26 @@ span.keyboardKey.notInWord, .shrink {
 #scoresTable {
     font-size: 1.5rem;
     margin-bottom: 1rem;
-    text-align: left;
     transition: transform var(--animTime);
+    text-align: left;
 }
 
 h2, h3 {
     margin: 0 0 1rem 0;
 }
 
-#scoresTable th {
-    text-align: left;
+#scoresTable :is(td, th):not(:last-child) {
+    width: 33vw;
+    max-width: 15ch;
 }
 
-#scoresTable :is(td, th):not(:last-child) {
-    padding-right: 3vw;
+#scoresTable :is(thead, tbody) {
+    display: block;
+}
+
+#scoresTable tbody {
+    max-height: 50vh;
+    overflow-y: scroll;
 }
 
 .highScoreForm {
