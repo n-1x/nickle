@@ -32,14 +32,25 @@ function getGuessColours(guess, target) {
     const guessChars = guess.split("");
     const targetChars = target.split("");
 
+    // counts occurances of value in a
+    const count = (a, value) =>
+        a.reduce((total, el) =>
+            total + (el === value)
+            , 0);
+
     const rules = [
         [hintClass.correctPosition, (gc, gi) => targetChars[gi] === gc],
         [hintClass.notInWord, gc => !targetChars.includes(gc)],
-        [hintClass.wordContains, (gc, gi) => targetChars.some((tc, ti) => tc === gc && guessChars[ti] !== tc)],
+        [hintClass.wordContains, (gc, gi) => targetChars.some((tc, ti) => {
+            const countBefore = count(guessChars.slice(0, gi), gc);
+            const countInTarget = count(targetChars, gc);
+
+            return countBefore < countInTarget && tc === gc && guessChars[ti] !== tc
+        })],
         [null, () => true]
     ];
 
-    return guessChars.map((gc, gi) => rules.find(([_, rule]) => rule(gc, gi))[0]);
+    return guessChars.map((gc, gi) => rules.find(([, rule]) => rule(gc, gi))[0]);
 }
 
 class Game {
@@ -65,7 +76,7 @@ class Game {
             }
         }
     }
-    
+
     updateCurrentRow() {
         const nodeList = this.#guessRows[this.#guessNumber].querySelectorAll(".guessChar");
         this.#currentRow = Array.from(nodeList);
@@ -128,7 +139,7 @@ class Game {
 
         this.makeGuess();
     }
-    
+
     makeGuess() {
         const guess = this.#currentRow.map(el => el.innerText).join("");
 
@@ -136,7 +147,7 @@ class Game {
             showMessage("Guess must be five characters")
             return;
         }
-        
+
         if (!g_guessList.includes(guess)) {
             showMessage("Not in word list");
             return;
@@ -146,7 +157,7 @@ class Game {
             this.#currentRow[index].classList.add("submitted", colour);
             g_keyMap[guess[index]].classList.add(colour);
         });
-        
+
         this.#guesses.push(guess);
         window.localStorage.guesses = JSON.stringify(this.#guesses);
 
@@ -234,9 +245,9 @@ async function updateScoresTable() {
     const template = document.getElementById("scoreEntryTemplate");
     const scoresTable = document.getElementById("scoresTable");
     const tableRows = scoresTable.querySelector("tbody");
-    const scoresFromToday = highScores.filter(({submitTime}) => isTimeFromToday(submitTime));
+    const scoresFromToday = highScores.filter(({ submitTime }) => isTimeFromToday(submitTime));
     const title = document.querySelector("#scoreboardContainer .title");
-    
+
     // Flip score order because server returns highest score first
     scoresFromToday.sort((a, b) => {
         if (a.score !== b.score) {
@@ -246,9 +257,9 @@ async function updateScoresTable() {
             return a.time < b.time ? -1 : 1;
         }
     });
-    
+
     tableRows.replaceChildren([]); //remove existing children
-    for (const {name, score, submitTime} of scoresFromToday) {
+    for (const { name, score, submitTime } of scoresFromToday) {
         const newNode = template.content.cloneNode(true);
         const nameEl = newNode.querySelector(".name");
         const numGuessesEl = newNode.querySelector(".numGuesses");
@@ -276,7 +287,7 @@ function createScoreboard(parent) {
     const closeButton = node.querySelector("#closeHighScoresButton");
     closeButton.onclick = () => {
         parent.classList.add("shrink");
-        
+
         setTimeout(() => {
             //destroy the scoreboard so it updates
             //every time it's opened
@@ -284,7 +295,7 @@ function createScoreboard(parent) {
             document.getElementById("gameContainer").classList.remove("shrink");
         }, SHRINK_TIME);
     }
-    
+
     document.activeElement.blur();
     parent.appendChild(node);
     updateScoresTable();
@@ -295,7 +306,7 @@ function createEndGamePlate(victory, numGuesses) {
     const template = document.getElementById("endGameTemplate");
 
     const node = template.content.cloneNode(true);
-    
+
     const endGameMessage = node.querySelector(".endGameMessage");
     endGameMessage.innerText = victory ? "Congratulations" : "Unlucky";
 
@@ -317,7 +328,7 @@ function createEndGamePlate(victory, numGuesses) {
     shareButton.onclick = () => {
         const emojiArray = ["⬛", "🟨", "🟩"];
         const emojiBoard = g_currentGame.getBoardState()
-            .map(row => row.map(i => emojiArray[i-1]).join("")).join("\n");
+            .map(row => row.map(i => emojiArray[i - 1]).join("")).join("\n");
 
         navigator.clipboard.writeText(`Nickle ${(new Date()).toLocaleDateString()}\n\n${emojiBoard}`);
         showMessage("Copied to clipboard");
@@ -330,7 +341,7 @@ function createEndGamePlate(victory, numGuesses) {
 
         createScoreboard(scoreboardContainer);
 
-        setTimeout(()=>{
+        setTimeout(() => {
             scoreboardContainer.classList.remove("shrink");
         }, SHRINK_TIME);
     };
@@ -412,7 +423,7 @@ function createGuessBoxes() {
     for (let i = 0; i < MAX_GUESSES; ++i) {
         const guessDiv = document.createElement("div");
         guessDiv.classList.add("guessRow");
-        
+
         for (let j = 0; j < WORD_LENGTH; ++j) {
             const element = document.createElement("span");
             element.classList.add("guessChar");
@@ -432,10 +443,10 @@ window.onload = async () => {
     const results = await Promise.all(g_initPromises);
     [g_wordList, g_guessList] = results.map(a => a.replaceAll(/[\r\n]+/g, "\n").toUpperCase().split("\n"));
 
-    const {lastStartTime, guesses, savedName} = window.localStorage;
+    const { lastStartTime, guesses, savedName } = window.localStorage;
 
     let savedGuesses = null;
-    
+
     if (!isTimeFromToday(lastStartTime)) {
         window.localStorage.clear();
 
@@ -449,7 +460,7 @@ window.onload = async () => {
     else if (guesses) {
         savedGuesses = JSON.parse(guesses);
     }
-    
+
     createKeyboard();
     createGuessBoxes();
     g_currentGame = new Game(savedGuesses);
@@ -472,12 +483,12 @@ window.onkeydown = e => {
     }
 
     if (DEBUG_MODE) {
-        switch(e.key) {
-            case "1": 
+        switch (e.key) {
+            case "1":
                 window.localStorage.clear();
                 break;
 
-            case "2" :
+            case "2":
                 window.location = window.location;
                 break;
         }
