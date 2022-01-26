@@ -241,6 +241,12 @@ function toTimeString(time) {
 
 function submitHighScore(e, numGuesses, timeTaken) {
     e.preventDefault();
+
+    if (!isTimeFromToday(g_startTime)) {
+        showMessage("Refresh to play today's word.");
+        return;
+    }
+
     const name = e.target.querySelector("input").value;
 
     if (name.length < 5) {
