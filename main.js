@@ -274,7 +274,7 @@ async function updateScoresTable() {
             return a.score < b.score ? -1 : 1;
         }
         else {
-            return a.guessTime < b.guessTime ? -1 : 1;
+            return parseInt(a.guessTime) < parseInt(b.guessTime) ? -1 : 1;
         }
     });
 
