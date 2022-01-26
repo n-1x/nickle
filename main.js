@@ -20,6 +20,7 @@ let g_currentGame = null;
 let g_wordList = null;  //words that could be chosen as the target
 let g_guessList = null; //allowed guesses
 let g_MessageElement = null;
+let g_firstGuessTime = window.localStorage.firstGuessTime || null;
 let g_startTime = window.localStorage.lastStartTime || Date.now();
 
 const hintClass = {
@@ -132,15 +133,11 @@ class Game {
         charElement.classList.remove("bounce");
     }
 
-    submitWord() {
+    makeGuess() {
         if (this.#gameOver) {
             return;
         }
 
-        this.makeGuess();
-    }
-
-    makeGuess() {
         const guess = this.#currentRow.map(el => el.innerText).join("");
 
         if (guess.length !== WORD_LENGTH) {
@@ -159,9 +156,15 @@ class Game {
         });
 
         this.#guesses.push(guess);
-        window.localStorage.guesses = JSON.stringify(this.#guesses);
 
+        if (g_firstGuessTime === null) {
+            g_firstGuessTime = Date.now();
+        }
         ++this.#guessNumber;
+
+        window.localStorage.guesses = JSON.stringify(this.#guesses);
+        window.localStorage.firstGuessTime = g_firstGuessTime;
+
         if (guess === this.#targetWord) {
             this.#endGame(true);
         }
@@ -179,9 +182,11 @@ class Game {
         const keyboard = document.getElementById("keyboard");
         keyboard.classList.add("slideBottom");
 
+        const timeTaken = Date.now() - g_firstGuessTime;
+
         setTimeout(() => {
             keyboard.remove();
-            createEndGamePlate(victory, this.#guessNumber);
+            createEndGamePlate(victory, this.#guessNumber, timeTaken);
         }, LENGTH_OF_KEYBOARD_ANIM);
     }
 
@@ -219,7 +224,22 @@ function isTimeFromToday(aTime) {
         && date.getDate() === now.getDate();
 }
 
-function submitHighScore(e, numGuesses) {
+function toTimeString(time) {
+    let timeInSeconds = Math.floor(time / 1000);
+    const hours = Math.floor(timeInSeconds / (60 * 60)).toString().padStart(2, "0");
+
+    timeInSeconds -= hours * 60 * 60;
+
+    const minutes = Math.floor(timeInSeconds / 60).toString().padStart(2, "0");
+    timeInSeconds -= minutes * 60;
+
+    const seconds = timeInSeconds.toString().padStart(2, "0");
+    const string = `${hours}h ${minutes}m ${seconds}s`;
+
+    return string;
+}
+
+function submitHighScore(e, numGuesses, timeTaken) {
     e.preventDefault();
     const name = e.target.querySelector("input").value;
 
@@ -230,7 +250,7 @@ function submitHighScore(e, numGuesses) {
         showMessage("Submitting score");
         e.target.classList.add("shrink");
 
-        fetch(`${API_URL}?game=nickle&daily=true&score=${numGuesses}&name=${name}`, {
+        fetch(`${API_URL}?game=nickle&daily=true&name=${name}&score=${numGuesses}&guessTime=${timeTaken}`, {
             method: "PUT"
         }).then(() => {
             updateScoresTable();
@@ -254,12 +274,12 @@ async function updateScoresTable() {
             return a.score < b.score ? -1 : 1;
         }
         else {
-            return a.time < b.time ? -1 : 1;
+            return a.guessTime < b.guessTime ? -1 : 1;
         }
     });
 
     tableRows.replaceChildren([]); //remove existing children
-    for (const { name, score, submitTime } of scoresFromToday) {
+    for (const { name, score, guessTime } of scoresFromToday) {
         const newNode = template.content.cloneNode(true);
         const nameEl = newNode.querySelector(".name");
         const numGuessesEl = newNode.querySelector(".numGuesses");
@@ -267,7 +287,7 @@ async function updateScoresTable() {
 
         nameEl.innerText = name;
         numGuessesEl.innerText = score;
-        timeEl.innerText = (new Date(parseInt(submitTime))).toLocaleTimeString();
+        timeEl.innerText = toTimeString(guessTime);
         tableRows.appendChild(newNode);
     }
 
@@ -301,18 +321,18 @@ function createScoreboard(parent) {
     updateScoresTable();
 }
 
-function createEndGamePlate(victory, numGuesses) {
+function createEndGamePlate(victory, numGuesses, timeTaken) {
     const parent = document.getElementById("gameContainer");
     const template = document.getElementById("endGameTemplate");
 
     const node = template.content.cloneNode(true);
-
     const endGameMessage = node.querySelector(".endGameMessage");
+
     endGameMessage.innerText = victory ? "Congratulations" : "Unlucky";
 
     const inputForm = node.querySelector(".highScoreForm");
     inputForm.onsubmit = e => {
-        submitHighScore(e, numGuesses);
+        submitHighScore(e, numGuesses, timeTaken);
         window.localStorage.submittedHighScore = true;
     }
 
@@ -391,7 +411,7 @@ function createKeyboard() {
             const enterKey = createKey("Guess");
             enterKey.classList.add("enterKey");
             enterKey.onclick = () => {
-                g_currentGame.submitWord();
+                g_currentGame.makeGuess();
             };
             rowDiv.appendChild(enterKey);
         }
@@ -456,6 +476,8 @@ window.onload = async () => {
 
         g_startTime = Date.now();
         window.localStorage.lastStartTime = g_startTime;
+
+        g_firstGuessTime = null;
     }
     else if (guesses) {
         savedGuesses = JSON.parse(guesses);
@@ -476,7 +498,7 @@ window.onkeydown = e => {
         g_currentGame.addChar(e.key);
     }
     else if (e.key === "Enter") {
-        g_currentGame.submitWord();
+        g_currentGame.makeGuess();
     }
     else if (e.key === "Backspace") {
         g_currentGame.delChar();
