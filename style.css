@@ -197,15 +197,12 @@ h2, h3 {
 }
 
 #scoresTable :is(td, th):not(:last-child) {
-    width: 33vw;
-    max-width: 15ch;
-}
-
-#scoresTable :is(thead, tbody) {
-    display: block;
+    width: 30vw;
+    max-width: 13ch;
 }
 
 #scoresTable tbody {
+    white-space: nowrap;
     max-height: 50vh;
     overflow-y: scroll;
 }
