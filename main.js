@@ -258,8 +258,16 @@ function submitHighScore(e, numGuesses, timeTaken) {
 
         fetch(`${API_URL}?game=nickle&daily=true&name=${name}&score=${numGuesses}&guessTime=${timeTaken}`, {
             method: "PUT"
-        }).then(() => {
-            updateScoresTable();
+        }).then(response => {
+            if (response.ok) {
+                updateScoresTable();
+                window.localStorage.highScoreSubmitSuccess = true;
+            }
+            else {
+                showMessage("Server error, please try again.");
+            }
+        }).catch(e => {
+            showMessage("Network error, please try again.");
         });
     }
 
@@ -339,7 +347,6 @@ function createEndGamePlate(victory, numGuesses, timeTaken) {
     const inputForm = node.querySelector(".highScoreForm");
     inputForm.onsubmit = e => {
         submitHighScore(e, numGuesses, timeTaken);
-        window.localStorage.submittedHighScore = true;
     }
 
     const nameInput = node.querySelector(".nameInput");
@@ -380,7 +387,7 @@ function createEndGamePlate(victory, numGuesses, timeTaken) {
     }
 
     // for when user visits page after finishing the game
-    if (!victory || window.localStorage.submittedHighScore) {
+    if (!victory || window.localStorage.highScoreSubmitSuccess) {
         inputForm.remove();
     }
 
