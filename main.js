@@ -182,7 +182,8 @@ class Game {
         const keyboard = document.getElementById("keyboard");
         keyboard.classList.add("slideBottom");
 
-        const timeTaken = Date.now() - g_firstGuessTime;
+        const timeTaken = window.localStorage.timeTaken || (Date.now() - g_firstGuessTime);
+        window.localStorage.timeTaken = timeTaken;
 
         setTimeout(() => {
             keyboard.remove();
