@@ -194,21 +194,20 @@ class Game {
         const state = [];
 
         for (const row of this.#guessRows) {
-            const stateRow = [];
-
-            for (const el of row.childNodes) {
+            const stateRow = Array.from(row.querySelectorAll(".submitted")).map(el => {
                 if (el.classList.contains(hintClass.correctPosition)) {
-                    stateRow.push(3);
+                    return 3;
                 }
                 else if (el.classList.contains(hintClass.wordContains)) {
-                    stateRow.push(2);
+                    return 2;
                 }
-                else {
-                    stateRow.push(1);
-                }
-            }
+                
+                return 1;
+            });
 
-            state.push(stateRow);
+            if (stateRow.length > 0) {
+                state.push(stateRow);
+            }
         }
 
         return state;
