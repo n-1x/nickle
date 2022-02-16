@@ -239,22 +239,22 @@ function toTimeString(time) {
     return string;
 }
 
-function submitHighScore(e, numGuesses, timeTaken) {
-    e.preventDefault();
+function submitHighScore(onClickEvent, numGuesses, timeTaken) {
+    onClickEvent.preventDefault();
 
     if (!isTimeFromToday(g_startTime)) {
         showMessage("Refresh to play today's word.");
         return;
     }
 
-    const name = e.target.querySelector("input").value;
+    const name = onClickEvent.target.querySelector("input").value;
 
     if (name.length < 5) {
         showMessage("Five characters minimum");
     }
     else {
         showMessage("Submitting score");
-        e.target.classList.add("shrink");
+        onClickEvent.target.classList.add("shrink");
 
         fetch(`${API_URL}?game=nickle&daily=true&name=${name}&score=${numGuesses}&guessTime=${timeTaken}`, {
             method: "PUT"
@@ -265,9 +265,11 @@ function submitHighScore(e, numGuesses, timeTaken) {
             }
             else {
                 showMessage("Server error, please try again.");
+                onClickEvent.target.classList.remove("shrink");
             }
         }).catch(e => {
             showMessage("Network error, please try again.");
+            onClickEvent.target.classList.remove("shrink");
         });
     }
 
