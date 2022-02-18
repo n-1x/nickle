@@ -12,8 +12,8 @@ body {
 }
 
 #container {
-    width: 100%;
-    height: 100%;
+    width: 100vw;
+    height: 100vh;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -21,13 +21,12 @@ body {
 }
 
 #gameContainer {
-    width: 100%;
-    height: 100%;
+    width: 100vw;
+    height: 80vh;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-start;
-    padding-top: 1%;
+    justify-content: center;
     transition: transform var(--animTime);
 }
 
@@ -35,8 +34,8 @@ body {
 .guesses {
     display: flex;
     flex-direction: column;
-    gap: 0.3rem;
-    font-size: 8vh;
+    gap: 0.3vh;
+    font-size: 6vh;
 }
 
 .guessRow {
@@ -45,10 +44,10 @@ body {
 }
 
 .guessChar {
-    border: 2px solid #555;
+    border: 1px solid #555;
     border-radius: 5%;
-    padding: 0.5rem;
-    width: min(7vh, 10vw);
+    padding: 0.5vh;
+    width: min(3rem, 10vh);
     aspect-ratio: 1 / 1;
     display: flex;
     justify-content: center;
@@ -81,8 +80,8 @@ body {
 .keyboardKey {
     background-color: #555;
     border-radius: 15%;
-    width: min(min(8vh,4rem), 12vw);
-    aspect-ratio: 1 / 1;
+    width: min(3rem, 9vw);
+    height: min(3rem, 9vh);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -92,7 +91,7 @@ body {
 }
 
 .keyboardKey.enterKey {
-    width: min(min(16vh,8rem), 24vw);
+    width: min(8rem, 20vh);
     aspect-ratio: 2 / 1;
 }
 
@@ -148,7 +147,7 @@ span.keyboardKey.notInWord, .shrink {
 #message {
     opacity: 0%;
     font-size: 4vh;
-    height: 4vh;
+    min-height: 4vh;
     margin: 1vh 0;
     user-select: none;
 }
