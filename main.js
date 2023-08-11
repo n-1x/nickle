@@ -195,7 +195,7 @@ class Game {
 
         setTimeout(() => {
             keyboard.remove();
-            createEndGamePlate(victory, this.#guessNumber, timeTaken);
+            createEndGamePlate(victory, this.#guessNumber, timeTaken, this.#targetWord);
         }, LENGTH_OF_KEYBOARD_ANIM);
     }
 
@@ -345,14 +345,14 @@ function createScoreboard(parent) {
     updateScoresTable();
 }
 
-function createEndGamePlate(victory, numGuesses, timeTaken) {
+function createEndGamePlate(victory, numGuesses, timeTaken, targetWord) {
     const parent = document.getElementById("gameContainer");
     const template = document.getElementById("endGameTemplate");
 
     const node = template.content.cloneNode(true);
     const endGameMessage = node.querySelector(".endGameMessage");
 
-    endGameMessage.innerText = victory ? "Congratulations" : "Unlucky";
+    endGameMessage.innerText = victory ? "Congratulations" : `Unlucky\nThe word was: ${targetWord}`;
 
     const inputForm = node.querySelector(".highScoreForm");
     inputForm.onsubmit = e => {
