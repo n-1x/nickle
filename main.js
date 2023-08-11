@@ -54,6 +54,22 @@ function getGuessColours(guess, target) {
     return guessChars.map((gc, gi) => rules.find(([, rule]) => rule(gc, gi))[0]);
 }
 
+function getTargetWordForDay(year, month, day) {
+    const rand =    seed => {
+        const r = (seed * 346542.12783198276 * Math.sin(seed + 12376293876.18769876));
+        return r - Math.floor(r);
+    };
+    
+    const seed = parseInt(`${year}${month}${day}`);
+    const randIndex = Math.floor(rand(seed) * g_wordList.length);
+    return g_wordList[randIndex].toUpperCase();
+}
+
+function getTargetWordForToday() {
+    const now = new Date();
+    return getTargetWordForDay(now.getFullYear(), now.getMonth(), now.getDate());
+}
+
 class Game {
     #guessRows;
     #currentRow;
@@ -85,15 +101,7 @@ class Game {
     }
 
     setTargetWord() {
-        const rand = seed => {
-            const r = (seed * 346542.12783198276 * Math.sin(seed + 12376293876.18769876));
-            return r - Math.floor(r);
-        };
-
-        const now = new Date();
-        const seed = parseInt(`${now.getFullYear()}${now.getMonth()}${now.getDate()}`);
-        const randIndex = Math.floor(rand(seed) * g_wordList.length);
-        this.#targetWord = g_wordList[randIndex].toUpperCase();
+        this.#targetWord = getTargetWordForToday();
     }
 
     addChar(char, skipBounce = false) {
