@@ -234,15 +234,21 @@ function isTimeFromToday(aTime) {
 
 function toTimeString(time) {
     let timeInSeconds = Math.floor(time / 1000);
-    const hours = Math.floor(timeInSeconds / (60 * 60)).toString().padStart(2, "0");
+    const hours = Math.floor(timeInSeconds / (60 * 60));
 
     timeInSeconds -= hours * 60 * 60;
 
-    const minutes = Math.floor(timeInSeconds / 60).toString().padStart(2, "0");
+    const minutes = Math.floor(timeInSeconds / 60);
     timeInSeconds -= minutes * 60;
 
-    const seconds = timeInSeconds.toString().padStart(2, "0");
-    const string = `${hours}h ${minutes}m ${seconds}s`;
+    const seconds = timeInSeconds;
+    const units = ["h", "m", "s"];
+    const string = [hours, minutes, seconds].map((value, index) => {
+        if (value > 0) {
+            return value.toString() + units[index];
+        }
+        return null;
+    }).filter(v => v !== null).join(" ");
 
     return string;
 }
@@ -373,7 +379,7 @@ function createEndGamePlate(victory, numGuesses, timeTaken, targetWord) {
         const emojiBoard = g_currentGame.getBoardState()
             .map(row => row.map(i => emojiArray[i - 1]).join("")).join("\n");
 
-        navigator.clipboard.writeText(`Nickle ${(new Date()).toLocaleDateString()}\n\n${emojiBoard}`);
+        navigator.clipboard.writeText(`${window.localStorage.savedName ?? "I"} finished Nickle in ${toTimeString(timeTaken)} on ${(new Date()).toLocaleDateString()}\n\n${emojiBoard}`);
         showMessage("Copied to clipboard");
     }
 
