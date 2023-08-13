@@ -454,7 +454,7 @@ function createKeyboard() {
         }
 
         if (rowNum === 2) {
-            const backspaceKey = createKey("<==");
+            const backspaceKey = createKey("<----");
             backspaceKey.classList.add("backspaceKey");
             backspaceKey.onclick = () => {
                 g_currentGame.delChar();
