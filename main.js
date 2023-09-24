@@ -55,8 +55,10 @@ function getGuessColours(guess, target) {
 }
 
 function getTargetWordForDay(year, month, day) {
-    const rand =    seed => {
-        const r = (seed * 346542.12783198276 * Math.sin(seed + 12376293876.18769876));
+    const rand = seed => {
+        // Need to round the sin because safari is less accurate than other browsers,
+        // resulting in a different word for apple users.
+        const r = (seed * 346542.12783198276 * Math.sin(seed + 12376293876.18769876).toFixed(12));
         return r - Math.floor(r);
     };
     
