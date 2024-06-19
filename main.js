@@ -405,7 +405,7 @@ function createEndGamePlate(victory, numGuesses, timeTaken, targetWord) {
     }
 
     // for when user visits page after finishing the game
-    if (!victory || window.localStorage.highScoreSubmitSuccess) {
+    if (!victory || window.localStorage.highScoreSubmitSuccess === "true") {
         inputForm.remove();
     }
 
