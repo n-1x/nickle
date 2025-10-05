@@ -6,7 +6,7 @@ const MAX_GUESSES = 6;
 const WORD_LENGTH = 5;
 const LENGTH_OF_KEYBOARD_ANIM = 1 * 1000;
 const SHRINK_TIME = 0.3 * 1000;
-const API_URL = "https://beautiful-mica-sundial.glitch.me";
+const API_URL = "httpS://simple-highscores.onrender.com";
 const DEBUG_MODE = (new URL(window.location)).port === "8000";
 
 //game won't start until these promises resolve
